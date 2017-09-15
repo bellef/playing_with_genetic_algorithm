@@ -26,19 +26,25 @@ end
 
 # Create the initial population
 def seed
-  length = @passphrase.length
-
   SEED_POPULATION_SIZE.times do |i|
     @seed_population[i] = {
-      phrase: ALPHABET.shuffle[0..length].join, # IMPROVE
+      phrase: ALPHABET.shuffle[0..@passphrase_length - 1].join, # IMPROVE
       score: 0
     }
   end
 end
 
+# Takes a char over 2 in every parent
 def crossover(parents)
-  parents[0]
-  # TODO
+  child = {
+    phrase: '',
+    score: 0
+  }
+  @passphrase_length.times do |i|
+    puts i
+    child[:phrase] << (i.even? ? parents[0][:phrase][i] : parents[1][:phrase][i])
+  end
+  child
 end
 
 def mutation(child)
@@ -57,6 +63,7 @@ def evolution
     selected_population = selection(population_n) # selection phase
     puts selected_population
 
+    # Create population N+1
     SEED_POPULATION_SIZE.times do
       # Pick 2 elements
       parents = selected_population.sample(2)
@@ -78,11 +85,11 @@ def problem_solved?(population)
 end
 
 def main
-  @problem_solved = false
   @seed_population = []
 
   puts "Please enter a passphrase that the algorithm will crack (20 char max):"
   @passphrase = gets.chomp[0..19]
+  @passphrase_length = @passphrase.length
   puts "\nPassphrase to find: \n[#{@passphrase}]"
 
   puts '------------------------------------------'
