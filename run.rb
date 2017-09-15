@@ -3,7 +3,7 @@
 
 SEED_POPULATION_SIZE = 20
 N_CHILDREN_TO_KEEP = SEED_POPULATION_SIZE / 4
-MUTATION_RATE = 0.1
+MUTATION_RATE = 0.25
 ALPHABET = %w[a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 1 2 3 4 5 6 7 8 9 ? , ; . : / ! § ù % * µ $ £ ^ ¨ = + ( ) ' & é ~ # " { } ° ç @ | `] << ' '
 
 # Gives a score to every indiv of the population
@@ -28,7 +28,7 @@ end
 def seed
   SEED_POPULATION_SIZE.times do |i|
     @seed_population[i] = {
-      phrase: ALPHABET.shuffle[0..@passphrase_length - 1].join, # IMPROVE
+      phrase: ALPHABET.sample(@passphrase_length).join, # IMPROVE
       score: 0
     }
   end
@@ -41,22 +41,25 @@ def crossover(parents)
     score: 0
   }
   @passphrase_length.times do |i|
-    puts i
     child[:phrase] << (i.even? ? parents[0][:phrase][i] : parents[1][:phrase][i])
   end
   child
 end
 
+# Mutates a gene following MUTATION_RATE
 def mutation(child)
+  nb_mutations = (MUTATION_RATE * @passphrase_length).round
+  nb_mutations.times do
+    index_to_mutate = rand(0..@passphrase_length - 1) # Pick a random index in passphrase
+    child[:phrase][index_to_mutate] = ALPHABET.sample # Change the character at the given index
+  end
   child
-  # MUTATION_RATE
-  # TODO
 end
 
 def evolution
   population_n = @seed_population
 
-  1.times do
+  4.times do
     children = []
   # until problem_solved?(population_n) # we decided to stop to the first solution
     evaluation(population_n) # evaluation phase
@@ -73,9 +76,9 @@ def evolution
       child = mutation(child)
       children << child
     end
-
-    puts "Children: "
-    puts children
+    # puts "CHILDREN:"
+    # puts children
+    population_n = children # Children are now parents
   end
 end
 
@@ -95,8 +98,7 @@ def main
   puts '------------------------------------------'
   puts 'STEP 1: Create a seed population'
   seed
-  puts 'Population intiated:'
-  puts @seed_population.map { |el| el[:phrase] }
+  puts 'Population intiated!'
 
   puts '------------------------------------------'
   puts 'STEP 2: Start a loop to find the passphrase'
